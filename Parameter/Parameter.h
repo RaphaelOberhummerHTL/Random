@@ -6,25 +6,27 @@
 #include <time.h>
 #include <string.h>
 
-#ifdef _WIN32
-    #include <windows.h>
-    #define AUTOSTART_KEY "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
-    #define AUTOSTART_NAME "MyProgram"
-#else
-    #include <unistd.h>
-    #define AUTOSTART_FILE_PATH "~/.config/autostart/MyProgram.desktop"
-#endif
+#include "../Installieren/Installieren.h"
 
-void Zu_viele_Parameter();
+#define ERROR_NO_INTERNET  -1
+#define ERROR_TOO_MANY_PARAMETERS -2
+#define ERROR_NO_HELP -3
+#define ERROR_HELP -4
+#define ERROR_NO_PARAMETERS -5
+#define ERROR_PARAMETER_PROMPT_FAILED -6
+#define ERROR_WRONG_PARAMETERS -7
+#define IGNORE_PARAMETER 2 //1 ist schon für EXIT_FAILURE reserviert
 
-void Hilfe();
+int Parameterabfrage(char Parameter[]);
 
-void keineHilfe();
+int Kein_Internet();
 
-void keine_Parameter();
+int Zu_viele_Parameter();
 
-void Installieren();
+int Hilfe();
 
-void Deinstallieren();
+int keineHilfe();
+
+int keine_Parameter();
 
 #endif

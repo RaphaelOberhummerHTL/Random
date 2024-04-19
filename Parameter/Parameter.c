@@ -1,26 +1,85 @@
 #include "Parameter.h"
 
-void Zu_viele_Parameter() {
+int Parameterabfrage(char Parameter[]) {
     int a;
-    srand(time(0));
     a = rand();
     a %= 3;
-    if(a == 0) {
+    if(strcmp(Parameter, "--Hilfe") != 0 && strcmp(Parameter, "--Installieren") != 0 && strcmp(Parameter, "--Deinstallieren") != 0 && strcmp(Parameter, "--keineHilfe") != 0) {
+        switch(a) {
+            case 0:
+                Zu_viele_Parameter();
+            case 1:
+                printf("Wenn du den Parameter nicht richtig schreiben kannst, weiß ich nicht was du von mir willst.\n");
+            case 2:
+                printf("Du musst zurück in den Deutschunterricht.\n");
+            default:
+                break;
+        }
+        return ERROR_WRONG_PARAMETERS;
+    }
+    switch (a){
+        case 0:
+            return Hilfe();
+            break;
+        case 1:
+            return keineHilfe();
+            break;
+        case 2:
+            printf("Dein Parameter ist zwar richtig geschrieben, dieser ist mir aber egal.\n");
+            return IGNORE_PARAMETER;
+            break;
+        default:
+            break;
+    }
+    return EXIT_FAILURE;
+}
+
+int Kein_Internet() {
+    int a;
+    a = rand();
+    a %= 3;
+    switch (a) {
+    case 0:
+        printf("Du hast kein Internet.\n");
+        break;
+    case 1:
+        printf("Wo bist du, dass du kein Internet hast?\n");
+        break;
+    case 2:
+        printf("Verbind dich mit dem Internet, dann kannst du mehr mit dem Rechner machen.\n");
+        break;
+    default:
+        break;
+    }
+    return ERROR_NO_INTERNET;
+}
+
+int Zu_viele_Parameter() {
+    int a;
+    a = rand();
+    a %= 3;
+    switch (a) {
+    case 0:
         printf("Was willst du von mir?\n");
-    }
-    else if(a == 1) {
+        break;
+    case 1:
         printf("Ich weiß nicht was du von mir willst.\n");
-    }
-    else if(a == 2) {
+        break;
+    case 2:
         printf("Du musst mir schon sagen was du von mir willst.\n");
+        break;
+    default:
+        break;
     }
+    return ERROR_TOO_MANY_PARAMETERS;
 }
 
-void Hilfe() {
+int keineHilfe() {
     printf("Du kennst dich eh aus.\n");
+    return ERROR_NO_HELP;
 }
 
-void keineHilfe() {
+int Hilfe() {
     printf("Es gibt folgende Parameter\n");
     printf("  --keine-Hilfe\n");
     printf("  --Hilfe\n");
@@ -28,96 +87,26 @@ void keineHilfe() {
     printf("  --Deinstalliern\n");
     printf("\n");
     printf("Bei keinen Parametern wird das Standardverhalten ausgeführt\n");
+    return ERROR_HELP;
 }
 
-void keine_Parameter() {
+int keine_Parameter() {
     int a;
-    srand(time(0));
     a = rand();
     a %= 3;
-    if(a == 0) {
-        system("curl parrot.live");
+    switch (a) {
+        case 0:
+            system("curl parrot.live");
+            break;
+        case 1:
+            system("curl ASCII.live/can-you-hear-me");
+            break;
+        case 2:
+            system("curl -H \"Accept-Language:de\" wttr.in/salzburg");
+            break;
+        default:
+            printf("Du hast zu wenige Parameter übergeben\n");
+            break;
     }
-    else if (a == 1) {
-        system("curl ASCII.live/can-you-hear-me");
-    }
-    else if(a == 2) {
-        system("curl -H \"Accept-Language:de\" wttr.in");
-    }
-}
-
-void Installieren() {
-#ifdef _WIN32
-    HKEY hKey;
-    LONG result = RegOpenKeyEx(HKEY_CURRENT_USER, AUTOSTART_KEY, 0, KEY_SET_VALUE, &hKey);
-    if (result != ERROR_SUCCESS) {
-        printf("Fehler beim Öffnen des Registrierungsschlüssels.\n");
-        return;
-    }
-
-    result = RegDeleteValue(hKey, AUTOSTART_NAME);
-    if (result != ERROR_SUCCESS && result != ERROR_FILE_NOT_FOUND) {
-        printf("Fehler beim Löschen des Autostart-Eintrags.\n");
-        RegCloseKey(hKey);
-        return;
-    }
-    printf("Autostart erfolgreich deaktiviert.\n");
-
-    RegCloseKey(hKey);
-#else
-    char desktopFilePath[] = AUTOSTART_FILE_PATH;
-
-    if (remove(desktopFilePath) != 0) {
-        printf("Fehler beim Löschen der Desktop-Datei.\n");
-        return;
-    }
-    printf("Autostart erfolgreich deaktiviert.\n");
-#endif
-}
-
-void Deinstallieren() {
-#ifdef _WIN32
-    char exePath[MAX_PATH];
-    DWORD pathLength = GetModuleFileName(NULL, exePath, MAX_PATH);
-    if (pathLength == 0) {
-        printf("Fehler beim Abrufen des Pfades des ausführbaren Programms.\n");
-        return;
-    }
-
-    HKEY hKey;
-    LONG result = RegOpenKeyEx(HKEY_CURRENT_USER, AUTOSTART_KEY, 0, KEY_SET_VALUE, &hKey);
-    if (result != ERROR_SUCCESS) {
-        printf("Fehler beim Öffnen des Registrierungsschlüssels.\n");
-        return;
-    }
-
-    result = RegSetValueEx(hKey, AUTOSTART_NAME, 0, REG_SZ, (BYTE*)exePath, (DWORD)(strlen(exePath) + 1));
-    if (result != ERROR_SUCCESS) {
-        printf("Fehler beim Festlegen des Autostart-Eintrags.\n");
-        RegCloseKey(hKey);
-        return;
-    }
-    printf("Autostart erfolgreich aktiviert.\n");
-
-    RegCloseKey(hKey);
-#else
-    char desktopFilePath[] = AUTOSTART_FILE_PATH;
-
-    FILE *desktopFile = fopen(desktopFilePath, "w");
-    if (desktopFile == NULL) {
-        printf("Fehler beim Erstellen der Desktop-Datei.\n");
-        return;
-    }
-
-    fprintf(desktopFile, "[Desktop Entry]\n");
-    fprintf(desktopFile, "Type=Application\n");
-    fprintf(desktopFile, "Exec=/pfad/zum/deinem/programm\n");
-    fprintf(desktopFile, "Hidden=false\n");
-    fprintf(desktopFile, "NoDisplay=false\n");
-    fprintf(desktopFile, "X-GNOME-Autostart-enabled=true\n");
-    fprintf(desktopFile, "Name=MyProgram\n");
-
-    fclose(desktopFile);
-    printf("Autostart erfolgreich aktiviert.\n");
-#endif
+    return ERROR_NO_PARAMETERS;
 }
